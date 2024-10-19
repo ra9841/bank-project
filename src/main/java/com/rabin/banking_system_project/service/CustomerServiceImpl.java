@@ -3,6 +3,7 @@ package com.rabin.banking_system_project.service;
 import com.rabin.banking_system_project.dto.CustomerDto;
 import com.rabin.banking_system_project.entity.Customer;
 import com.rabin.banking_system_project.exception.CustomerAlreadyExistException;
+import com.rabin.banking_system_project.exception.CustomerNotPresentException;
 import com.rabin.banking_system_project.repository.CustomerRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -103,6 +104,56 @@ public class CustomerServiceImpl implements CustomerService {
                     return "delete successfully";
                 })
                 .orElse("not deleted.....no record found");
+    }
+
+    @Override
+    public CustomerDto getParticularCustomerRecord(String email) {
+        Optional<Customer> existCustomer = customerRepository.findByEmail(email);
+        log.info("Customer record present in database {}", existCustomer);
+        if (existCustomer.isPresent()) {
+            Customer customer = existCustomer.get();
+            CustomerDto customerDto = new CustomerDto();
+            BeanUtils.copyProperties(customer, customerDto);
+            return customerDto;
+        }
+        throw new CustomerNotPresentException("Customer Record is not present in database");
+    }
+
+    @Override
+    public CustomerDto updatingTheCustomerRecord(CustomerDto customerDto, String email) {
+
+        CustomerDto customerDto1 = getParticularCustomerRecord(email);
+        log.info("Customer Record from particular function {}", customerDto1);
+
+        customerDto1.setName(customerDto.getName());
+        customerDto1.setEmail(customerDto.getEmail());
+        customerDto1.setAddress(customerDto.getAddress());
+        customerDto1.setPassword(customerDto.getPassword());
+        customerDto1.setUsername(customerDto.getUsername());
+        customerDto1.setPhoneNumber(customerDto.getPhoneNumber());
+        log.info("Record change from up {}", customerDto1);
+
+        Optional<Customer> existCustomer = customerRepository.findByEmail(email);
+        log.info("Customer record exist in database {}", existCustomer);
+        if (existCustomer.isPresent()) {
+            Customer customer = existCustomer.get();
+            customer.setName(customerDto1.getName().toLowerCase());
+            customer.setEmail(customerDto1.getEmail().toLowerCase());
+            customer.setPhoneNumber(customerDto1.getPhoneNumber().toLowerCase());
+            customer.setUsername(customerDto1.getUsername().toLowerCase());
+            customer.setPassword(passwordEncoder.encode(customerDto1.getPassword()));
+            customer.setAddress(customerDto.getAddress().toLowerCase());
+            log.info("Customer record set and about to save in database {}", customer);
+
+            Customer customer1 = customerRepository.save(customer);
+
+            CustomerDto customerDto2 = new CustomerDto();
+            BeanUtils.copyProperties(customer1, customerDto2);
+            log.info("Customer updated record is sending to controller {}", customerDto2);
+            return customerDto2;
+        }
+
+        throw new CustomerNotPresentException("Customer Record is not present in database");
     }
 
 

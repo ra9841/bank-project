@@ -30,4 +30,17 @@ public class CustomerController {
       return ResponseEntity.ok(customerService.deletingTheRecordByEmail(email));
     }
 
+    //for update operation first we need to retrieve particular data
+    @GetMapping("/shows/{email}")
+    public ResponseEntity<CustomerDto> gettingParticularRecord(@PathVariable String email){
+     return ResponseEntity.ok( customerService.getParticularCustomerRecord(email));
+    }
+
+    //now we are retrieving the record to update
+    @PutMapping("/{email}")
+    public ResponseEntity<CustomerDto> updatingTheRecord(@RequestBody CustomerDto customerDto,@PathVariable String email){
+     return ResponseEntity.ok(customerService.updatingTheCustomerRecord(customerDto,email));
+    }
+
+
 }

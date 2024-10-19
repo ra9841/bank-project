@@ -10,4 +10,9 @@ public interface CustomerService {
     List<CustomerDto> listOfCustomerRecord();
 
     String deletingTheRecordByEmail(String email);
+
+
+    CustomerDto getParticularCustomerRecord(String email);
+
+    CustomerDto updatingTheCustomerRecord(CustomerDto customerDto, String email);
 }
